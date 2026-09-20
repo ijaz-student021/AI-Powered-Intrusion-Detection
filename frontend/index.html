@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureNet IDS Panel</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>SecureNet IDS Panel</h2>
+            </div>
+            
+            <div class="current-model-status">
+                <span class="status-label">Current Model</span>
+                <div id="statusModelName" class="status-value">Loading...</div>
+                <div id="statusModelAcc" class="status-sub">--</div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" data-page="page-dashboard">
+                    <span class="icon">📊</span> Dashboard
+                </button>
+                <button class="nav-btn" data-page="page-training">
+                    <span class="icon">🧠</span> Model Training
+                </button>
+                <button class="nav-btn" data-page="page-visualizations">
+                    <span class="icon">📈</span> Visualizations
+                </button>
+                <button class="nav-btn" data-page="page-predictions">
+                    <span class="icon">🔍</span> Predictions
+                </button>
+                <button class="nav-btn" data-page="page-history">
+                    <span class="icon">🕒</span> Model History
+                </button>
+                <button class="nav-btn" data-page="page-settings">
+                    <span class="icon">⚙️</span> Settings
+                </button>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading">
+                Connecting to AI Backend...
+            </div>
+            <div id="errorIndicator" class="error hidden"></div>
+
+            <!-- Page: Dashboard -->
+            <section id="page-dashboard" class="page active">
+                <header class="page-header">
+                    <h1>Dashboard Overview</h1>
+                </header>
+                <div class="layout-grid">
+                    <div class="card summary-card">
+                        <h3>Total Classes</h3>
+                        <div class="big-number">10</div>
+                    </div>
+                    <div class="card summary-card">
+                        <h3>Dataset</h3>
+                        <div class="big-number">UNSW-NB15</div>
+                    </div>
+                    <div class="card summary-card">
+                        <h3>Available Models</h3>
+                        <div class="big-number" id="dashModelCount">--</div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <h3>About SecureNet IDS</h3>
+                    <p>This panel provides AI-driven network intrusion detection capabilities based on multiple pre-trained machine learning pipelines. Analyze individual traffic flows or upload bulk CSV logs to identify malicious network behavior.</p>
+                    <div class="quick-links mt-4">
+                        <button class="btn primary btn-nav" data-target="page-predictions">Go to Predictions</button>
+                        <button class="btn secondary btn-nav" data-target="page-visualizations">View Visualizations</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Model Training -->
+            <section id="page-training" class="page hidden">
+                <header class="page-header">
+                    <h1>Model Training Information</h1>
+                </header>
+                <div class="card">
+                    <p>These models were trained on the UNSW-NB15 dataset using an 80/20 train/test split. Due to severe class imbalance, SMOTENC (Synthetic Minority Over-sampling Technique for Nominal and Continuous) was applied to the training set. A RobustScaler was used to handle outliers in the numerical features before passing them to the final estimators.</p>
+                    
+                    <h4 class="mt-4">LightGBM (Gradient Boosting)</h4>
+                    <p>A fast, distributed, high-performance gradient boosting framework based on decision tree algorithms.</p>
+                    
+                    <h4 class="mt-4">MLP (Neural Network)</h4>
+                    <p>A Multi-Layer Perceptron trained with backpropagation, designed to capture complex non-linear relationships in network traffic.</p>
+                </div>
+            </section>
+
+            <!-- Page: Visualizations -->
+            <section id="page-visualizations" class="page hidden">
+                <header class="page-header">
+                    <h1>Model Visualizations</h1>
+                    <select id="vizModelSelect" class="form-select">
+                        <!-- Populated by JS -->
+                    </select>
+                </header>
+                
+                <div class="layout-grid">
+                    <div class="card">
+                        <h3>Validation Confusion Matrix</h3>
+                        <img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid">
+                    </div>
+                    <div class="card">
+                        <h3>Test Confusion Matrix</h3>
+                        <img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid">
+                    </div>
+                    <div class="card" style="grid-column: 1 / -1;">
+                        <h3>ROC-AUC Curve (Test)</h3>
+                        <img id="vizRoc" src="" alt="ROC Curve" class="img-fluid" style="max-width: 600px; margin: 0 auto; display: block;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Predictions -->
+            <section id="page-predictions" class="page hidden">
+                <header class="page-header">
+                    <h1>Predictions</h1>
+                    <select id="predictModelSelect" class="form-select">
+                        <option value="compare_all">Compare All Models</option>
+                    </select>
+                </header>
+
+                <div class="layout-grid">
+                    <!-- Manual Input Panel -->
+                    <div class="card">
+                        <h2>Manual Input</h2>
+                        <div class="toggle-mode mb-3">
+                            <label><input type="radio" name="inputMode" value="form" checked> Form</label>
+                            <label><input type="radio" name="inputMode" value="json"> JSON</label>
+                        </div>
+                        
+                        <form id="singleForm" class="dynamic-form"></form>
+                        
+                        <div id="jsonInputMode" class="hidden">
+                            <textarea id="jsonInput" rows="10" placeholder='{"proto": "tcp", ...}'></textarea>
+                        </div>
+                        
+                        <button id="btnAnalyze" class="btn primary mt-3">Predict</button>
+                        <div id="singleError" class="error hidden mt-3"></div>
+                        
+                        <!-- Results -->
+                        <div id="singleResultArea" class="mt-4 hidden">
+                            <hr>
+                            <h3>Result</h3>
+                            <div id="singleResultContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Batch Upload Panel -->
+                    <div class="card">
+                        <h2>Batch Prediction (Upload CSV)</h2>
+                        <input type="file" id="batchFile" accept=".csv" class="mb-3">
+                        <button id="btnBatch" class="btn primary">Run Detection</button>
+                        <div id="batchError" class="error hidden mt-3"></div>
+
+                        <div id="batchResults" class="hidden mt-4">
+                            <hr>
+                            <div class="flex-between mb-3">
+                                <h3>Batch Results</h3>
+                                <button id="btnDownloadCSV" class="btn secondary sm">Download Results</button>
+                            </div>
+                            
+                            <!-- Distribution Chart (only for single model) -->
+                            <div id="batchChartContainer" class="hidden mb-4">
+                                <h4>Distribution</h4>
+                                <canvas id="batchChart"></canvas>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table id="batchTable" class="data-table">
+                                    <thead>
+                                        <tr id="batchTableHeadRow"></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Page: Model History -->
+            <section id="page-history" class="page hidden">
+                <header class="page-header">
+                    <h1>Model Performance History</h1>
+                </header>
+                <div class="card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Test Accuracy</th>
+                                <th>Test Weighted F1</th>
+                                <th>Dataset</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Page: Settings -->
+            <section id="page-settings" class="page hidden">
+                <header class="page-header">
+                    <h1>Settings</h1>
+                </header>
+                <div class="card" style="max-width: 500px;">
+                    <div class="form-group mb-3">
+                        <label>API Base URL</label>
+                        <input type="text" id="apiBaseUrl" value="http://127.0.0.1:8000/api">
+                    </div>
+                    <button id="btnTestConnection" class="btn secondary">Test Connection</button>
+                    <div id="settingsResult" class="mt-3"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
