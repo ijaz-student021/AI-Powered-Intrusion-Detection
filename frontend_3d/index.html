@@ -15,8 +15,8 @@
     <div class="vignette"></div>
 
     <div class="app">
-        <!-- Top navigation -->
-        <header class="topbar">
+        <!-- Sidebar navigation -->
+        <aside class="topbar">
             <div class="brand">
                 <div class="brand-logo">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
@@ -26,19 +26,28 @@
 
             <nav class="sidebar-nav">
                 <button class="nav-btn active" data-page="page-dashboard"><span class="icon">◈</span> Dashboard</button>
-                <button class="nav-btn" data-page="page-training"><span class="icon">◉</span> Training</button>
-                <button class="nav-btn" data-page="page-visualizations"><span class="icon">▤</span> Visuals</button>
-                <button class="nav-btn" data-page="page-predictions"><span class="icon">⌖</span> Predict</button>
-                <button class="nav-btn" data-page="page-history"><span class="icon">◷</span> History</button>
+                <button class="nav-btn" data-page="page-explorer"><span class="icon">▦</span> Data Explorer</button>
+                <button class="nav-btn" data-page="page-training"><span class="icon">◉</span> Model Training</button>
+                <button class="nav-btn" data-page="page-visualizations"><span class="icon">▤</span> Visualizations</button>
+                <button class="nav-btn" data-page="page-predictions"><span class="icon">⌖</span> Predictions</button>
+                <button class="nav-btn" data-page="page-history"><span class="icon">◷</span> Model History</button>
                 <button class="nav-btn" data-page="page-settings"><span class="icon">⚙</span> Settings</button>
             </nav>
 
-            <div class="current-model-status">
-                <span class="status-label">Active model</span>
-                <div id="statusModelName" class="status-value">Loading...</div>
-                <div id="statusModelAcc" class="status-sub">--</div>
+            <div class="sidebar-foot">
+                <div class="current-model-status">
+                    <span class="status-label">Active model</span>
+                    <div id="statusModelName" class="status-value">Loading...</div>
+                    <div id="statusModelAcc" class="status-sub">--</div>
+                </div>
+                <div class="dataset-info">
+                    <span class="status-label">Current dataset</span>
+                    <strong>UNSW-NB15</strong>
+                    <small>Rows: <b id="dsRows">257,673</b> | Features: <b id="dsFeatures">--</b> | Classes: <b>10</b></small>
+                </div>
+                <button id="btnNewSession" class="btn secondary new-session">New Session</button>
             </div>
-        </header>
+        </aside>
 
         <main class="main-content">
             <div id="loadingIndicator" class="loading">Connecting to AI Backend...</div>
@@ -81,27 +90,64 @@
                 </div>
             </section>
 
+            <!-- Data Explorer -->
+            <section id="page-explorer" class="page hidden">
+                <header class="page-header"><h1>Data Explorer</h1></header>
+                <div class="card">
+                    <h2>Dataset Upload</h2>
+                    <input type="file" id="explorerFile" accept=".csv" class="mb-3">
+                    <p class="text-muted" id="explorerHint">Choose a CSV to preview it locally. Nothing is uploaded to the server.</p>
+                    <div id="explorerOut" class="hidden mt-3">
+                        <div class="table-responsive"><table class="data-table"><thead id="explorerHead"></thead><tbody id="explorerBody"></tbody></table></div>
+                        <div class="ds-stats mt-3" id="explorerStats"></div>
+                        <div id="explorerChartWrap" class="hidden mt-4"><h4>Class distribution (attack_cat)</h4><canvas id="explorerChart"></canvas></div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Training -->
             <section id="page-training" class="page hidden">
                 <header class="page-header"><h1>Model Training</h1></header>
-                <div class="card">
-                    <p>These models were trained on the UNSW-NB15 dataset using an 80/20 train/test split. Due to severe class imbalance, SMOTENC (Synthetic Minority Over-sampling Technique for Nominal and Continuous) was applied to the training set. A RobustScaler was used to handle outliers in the numerical features before passing them to the final estimators.</p>
-                    <div class="layout-grid mt-4">
-                        <div class="inner"><h4>LightGBM · Gradient Boosting</h4><p>A fast, distributed, high-performance gradient boosting framework based on decision tree algorithms.</p></div>
-                        <div class="inner"><h4>MLP · Neural Network</h4><p>A Multi-Layer Perceptron trained with backpropagation, designed to capture complex non-linear relationships in network traffic.</p></div>
+                <div class="algo-row">
+                    <div class="algo selected"><b>LightGBM</b><span>★★★</span></div>
+                    <div class="algo selected"><b>MLP</b><span>★★★</span></div>
+                    <div class="algo"><b>Random Forest</b><span>notebook only</span></div>
+                    <div class="algo"><b>XGBoost</b><span>notebook only</span></div>
+                </div>
+                <div class="layout-grid mt-4">
+                    <div class="card">
+                        <h2>Algorithm Configuration</h2>
+                        <div class="kv"><span>LightGBM</span><b>defaults, random_state=42</b></div>
+                        <div class="kv"><span>MLP hidden layers</span><b>(100, 50)</b></div>
+                        <div class="kv"><span>MLP max iterations</span><b>1000</b></div>
+                        <div class="kv"><span>Scaler</span><b>RobustScaler</b></div>
+                        <div class="kv"><span>Encoding</span><b>One-hot (proto, service, state)</b></div>
                     </div>
+                    <div class="card">
+                        <h2>Training Settings</h2>
+                        <div class="kv"><span>Train / validation split</span><b>80 / 20 (stratified)</b></div>
+                        <div class="kv"><span>Class balancing</span><b>SMOTENC</b></div>
+                        <div class="kv"><span>Final test set</span><b>UNSW-NB15 partition (82,332)</b></div>
+                        <div class="progress"><div style="width:100%"></div></div>
+                        <small>Training complete. Models are trained in the notebook (Assignmetn_one_file.ipynb) and loaded here for inference.</small>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <p>Due to severe class imbalance, SMOTENC (SMOTE for Nominal and Continuous features) was applied to the training set, and a RobustScaler handles outliers in numeric features. LightGBM is a fast gradient-boosting framework on decision trees; the MLP is a neural network trained with backpropagation to capture non-linear relationships in network traffic.</p>
                 </div>
             </section>
 
             <!-- Visualizations -->
             <section id="page-visualizations" class="page hidden">
                 <header class="page-header">
-                    <h1>Model Visualizations</h1>
+                    <h1>Visualization Dashboard</h1>
                     <select id="vizModelSelect" class="form-select"></select>
                 </header>
                 <div class="layout-grid">
-                    <div class="card"><h3>Validation Confusion Matrix</h3><img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid"></div>
-                    <div class="card"><h3>Test Confusion Matrix</h3><img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid"></div>
+                    <div class="card"><h3>Model Accuracy Comparison</h3><canvas id="vizAccChart"></canvas></div>
+                    <div class="card"><h3>Feature Importance (LightGBM, top 10)</h3><canvas id="vizFeatChart"></canvas></div>
+                    <div class="card"><h3>Confusion Matrix (Test)</h3><img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid"></div>
+                    <div class="card"><h3>Confusion Matrix (Validation)</h3><img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid"></div>
                     <div class="card" style="grid-column: 1 / -1;">
                         <h3>ROC-AUC Curve (Test)</h3>
                         <img id="vizRoc" src="" alt="ROC Curve" class="img-fluid" style="max-width: 600px; margin: 0 auto; display: block;">
@@ -112,7 +158,7 @@
             <!-- Predictions -->
             <section id="page-predictions" class="page hidden">
                 <header class="page-header">
-                    <h1>Threat Analysis</h1>
+                    <h1>Make Predictions</h1>
                     <select id="predictModelSelect" class="form-select">
                         <option value="compare_all">Compare All Models</option>
                     </select>
@@ -165,12 +211,16 @@
 
             <!-- History -->
             <section id="page-history" class="page hidden">
-                <header class="page-header"><h1>Model Performance</h1></header>
+                <header class="page-header"><h1>Model Performance History</h1></header>
                 <div class="card">
                     <table class="data-table">
-                        <thead><tr><th>Model</th><th>Test Accuracy</th><th>Test Weighted F1</th><th>Dataset</th></tr></thead>
+                        <thead><tr><th>Date</th><th>ID</th><th>Model</th><th>Accuracy</th><th>Weighted F1</th><th>Dataset</th><th>Action</th></tr></thead>
                         <tbody id="historyTableBody"></tbody>
                     </table>
+                    <div class="mt-3 hist-actions">
+                        <button class="btn secondary sm" id="btnCompareAll">Compare</button>
+                        <button class="btn secondary sm" id="btnClearHist">Clear list</button>
+                    </div>
                 </div>
             </section>
 
@@ -195,5 +245,6 @@
 
     <script src="scene.js"></script>
     <script src="app.js"></script>
+    <script src="extras.js"></script>
 </body>
 </html>

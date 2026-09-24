@@ -84,9 +84,11 @@ async function fetchInitialData() {
         document.getElementById('loadingIndicator').classList.add('hidden');
         
         // Load default model
-        document.getElementById('predictModelSelect').value = availableModels[0].id;
-        updateCurrentModelStatus(availableModels[0].id);
+        document.getElementById('predictModelSelect').value = 'compare_all';
+        updateCurrentModelStatus('compare_all');
         
+        if (window.onAppReady) window.onAppReady();
+
         if(availableModels.length > 0) {
             document.getElementById('vizModelSelect').value = availableModels[0].id;
             loadVisualizations(availableModels[0].id);
@@ -117,13 +119,17 @@ function populateModelSelectors() {
 function populateHistoryTable() {
     const tbody = document.getElementById('historyTableBody');
     tbody.innerHTML = '';
+    const today = new Date().toISOString().slice(0, 10);
     availableModels.forEach(m => {
         tbody.innerHTML += `
             <tr>
+                <td>${today}</td>
+                <td>${m.id}</td>
                 <td>${m.name}</td>
                 <td>${(m.test_accuracy * 100).toFixed(2)}%</td>
                 <td>${(m.test_weighted_f1 * 100).toFixed(2)}%</td>
                 <td>UNSW-NB15</td>
+                <td><button class="btn secondary sm" data-load-model="${m.id}">Load Model</button></td>
             </tr>
         `;
     });
@@ -317,8 +323,8 @@ function displayBatchResults(result, modelId) {
             headRow.innerHTML += `<th>${m.name}</th>`;
             csvHeaders.push(m.name);
         });
-        headRow.innerHTML += `<th>Agreement</th>`;
-        csvHeaders.push('Agreement');
+        headRow.innerHTML += `<th>Final Pred</th><th>Confidence</th><th>Agreement</th>`;
+        csvHeaders.push('Final Pred', 'Confidence', 'Agreement');
         
         let csvRows = [csvHeaders.join(',')];
         
@@ -333,6 +339,7 @@ function displayBatchResults(result, modelId) {
                 const p = row.predictions[m.id];
                 csvData.push(`${p.predicted_class} (${(p.confidence*100).toFixed(1)}%)`);
             });
+            { const f = row.predictions[availableModels[0].id]; csvData.push(f.predicted_class, (f.confidence*100).toFixed(1)+'%'); }
             csvData.push(row.agreement ? 'Yes' : 'No');
             csvRows.push(csvData.join(','));
         });
@@ -348,6 +355,8 @@ function displayBatchResults(result, modelId) {
                 trHtml += `<td>${p.predicted_class} (${(p.confidence*100).toFixed(1)}%) ${warn}</td>`;
             });
             
+            const f = row.predictions[availableModels[0].id];
+            trHtml += `<td><span class="badge ${f.is_attack ? 'danger' : 'safe'}">${f.predicted_class}</span></td><td>${(f.confidence*100).toFixed(0)}%</td>`;
             const agreeText = row.agreement ? '✅ Yes' : '⚠️ No';
             trHtml += `<td>${agreeText}</td>`;
             

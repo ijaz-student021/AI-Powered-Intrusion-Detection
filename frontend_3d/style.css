@@ -241,3 +241,40 @@ input[type="file"]::file-selector-button {
     .page, .status-value::before { animation: none; }
     .card { transition: none; }
 }
+
+/* ---------- Sidebar layout (matches sample screens) ---------- */
+.app { display: flex; align-items: flex-start; gap: 1.25rem; width: min(1440px, calc(100% - 28px)); margin: 14px auto; }
+.topbar {
+    position: sticky; top: 14px; margin: 0; width: 262px; flex-shrink: 0;
+    height: calc(100vh - 28px); flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 1.1rem;
+    padding: 1rem 0.85rem; overflow-y: auto;
+}
+.sidebar-nav { flex-direction: column; flex-wrap: nowrap; justify-content: flex-start; gap: 0.15rem; }
+.nav-btn { width: 100%; padding: 0.6rem 0.8rem; }
+.main-content { flex: 1; min-width: 0; width: auto; margin: 0; padding: 1rem 0 3rem; }
+.sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 0.7rem; }
+.current-model-status { text-align: left; }
+.dataset-info { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.6rem 0.8rem; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); }
+.dataset-info strong { font-family: 'Sora', sans-serif; font-size: 0.9rem; }
+.dataset-info small b { color: var(--text); font-weight: 600; }
+.new-session { width: 100%; }
+
+.algo-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.8rem; }
+.algo { padding: 0.9rem 1rem; border-radius: 14px; text-align: center; border: 1px dashed var(--border); color: var(--muted); background: rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 0.25rem; }
+.algo b { font-family: 'Sora', sans-serif; color: var(--text); }
+.algo span { font-size: 0.8rem; }
+.algo.selected { border: 1px solid var(--cyan); background: rgba(34,211,238,0.08); box-shadow: 0 0 24px rgba(34,211,238,0.15); }
+.algo.selected span { color: var(--warn); }
+.kv { display: flex; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.kv span { color: var(--muted); }
+.progress { height: 10px; border-radius: 999px; background: rgba(255,255,255,0.08); margin: 1rem 0 0.5rem; overflow: hidden; }
+.progress div { height: 100%; background: var(--grad); border-radius: 999px; }
+.ds-stats { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.hist-actions { display: flex; gap: 0.6rem; }
+
+@media (max-width: 900px) {
+    .app { flex-direction: column; }
+    .topbar { position: static; width: 100%; height: auto; }
+    .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
+    .nav-btn { width: auto; }
+}

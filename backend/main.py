@@ -43,5 +43,16 @@ def get_models():
         {"id": "mlp", "name": "MLP Neural Network", "test_accuracy": 0.67, "test_weighted_f1": 0.73}
     ]
 
+@app.get("/api/feature-importance")
+def feature_importance(top: int = 10):
+    """Top LightGBM feature importances (split counts), for the Visualizations page."""
+    pipe = model_loader.MODELS.get("lightgbm")
+    if pipe is None or not model_loader.feature_columns:
+        return []
+    imp = pipe.named_steps["classifier"].feature_importances_
+    pairs = sorted(zip(model_loader.feature_columns, imp), key=lambda x: -x[1])[:max(1, min(top, 30))]
+    total = float(sum(imp)) or 1.0
+    return [{"feature": f, "importance": round(float(v) / total, 4)} for f, v in pairs]
+
 app.include_router(predict.router, prefix="/api")
 app.include_router(predict_batch.router, prefix="/api")
