@@ -3,116 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SecureNet IDS Panel</title>
+    <title>SecureNet Sentinel | AI Intrusion Detection</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <div class="dashboard-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>SecureNet<br><span style="color:#8b97b1;font-weight:500;font-size:.8rem">AI Intrusion Detection</span></h2>
-            </div>
-            
-            <div class="current-model-status">
-                <span class="status-label">Current Model</span>
-                <div id="statusModelName" class="status-value">Loading...</div>
-                <div id="statusModelAcc" class="status-sub">--</div>
+    <canvas id="scene3d" aria-hidden="true"></canvas>
+    <div class="vignette"></div>
+
+    <div class="app">
+        <!-- Top navigation -->
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+                </div>
+                <div class="brand-text"><strong>SecureNet</strong><span>Sentinel IDS</span></div>
             </div>
 
             <nav class="sidebar-nav">
-                <button class="nav-btn active" data-page="page-dashboard">
-                    <span class="icon">📊</span> Dashboard
-                </button>
-                <button class="nav-btn" data-page="page-training">
-                    <span class="icon">🧠</span> Model Training
-                </button>
-                <button class="nav-btn" data-page="page-visualizations">
-                    <span class="icon">📈</span> Visualizations
-                </button>
-                <button class="nav-btn" data-page="page-predictions">
-                    <span class="icon">🔍</span> Predictions
-                </button>
-                <button class="nav-btn" data-page="page-history">
-                    <span class="icon">🕒</span> Model History
-                </button>
-                <button class="nav-btn" data-page="page-settings">
-                    <span class="icon">⚙️</span> Settings
-                </button>
+                <button class="nav-btn active" data-page="page-dashboard"><span class="icon">◈</span> Dashboard</button>
+                <button class="nav-btn" data-page="page-training"><span class="icon">◉</span> Training</button>
+                <button class="nav-btn" data-page="page-visualizations"><span class="icon">▤</span> Visuals</button>
+                <button class="nav-btn" data-page="page-predictions"><span class="icon">⌖</span> Predict</button>
+                <button class="nav-btn" data-page="page-history"><span class="icon">◷</span> History</button>
+                <button class="nav-btn" data-page="page-settings"><span class="icon">⚙</span> Settings</button>
             </nav>
-        </aside>
+
+            <div class="current-model-status">
+                <span class="status-label">Active model</span>
+                <div id="statusModelName" class="status-value">Loading...</div>
+                <div id="statusModelAcc" class="status-sub">--</div>
+            </div>
+        </header>
 
         <main class="main-content">
-            <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="loading">
-                Connecting to AI Backend...
-            </div>
+            <div id="loadingIndicator" class="loading">Connecting to AI Backend...</div>
             <div id="errorIndicator" class="error hidden"></div>
 
-            <!-- Page: Dashboard -->
+            <!-- Dashboard -->
             <section id="page-dashboard" class="page active">
-                <header class="page-header">
-                    <h1>Dashboard Overview</h1>
-                </header>
-                <div class="layout-grid">
-                    <div class="card summary-card">
-                        <h3>Total Classes</h3>
-                        <div class="big-number">10</div>
-                    </div>
-                    <div class="card summary-card">
-                        <h3>Dataset</h3>
-                        <div class="big-number">UNSW-NB15</div>
-                    </div>
-                    <div class="card summary-card">
-                        <h3>Available Models</h3>
-                        <div class="big-number" id="dashModelCount">--</div>
+                <div class="hero">
+                    <span class="eyebrow"><i></i> Real-time threat detection</span>
+                    <h1>Detect intrusions <em>before</em> they become incidents.</h1>
+                    <p>Machine-learning powered network traffic classification across 10 classes, trained on the UNSW-NB15 benchmark. Analyse a single flow or scan an entire log in seconds.</p>
+                    <div class="quick-links">
+                        <button class="btn primary btn-nav" data-target="page-predictions">Start analysis →</button>
+                        <button class="btn secondary btn-nav" data-target="page-visualizations">View model metrics</button>
                     </div>
                 </div>
-                <div class="card mt-4">
-                    <h3>About SecureNet IDS</h3>
-                    <p>This panel provides AI-driven network intrusion detection capabilities based on multiple pre-trained machine learning pipelines. Analyze individual traffic flows or upload bulk CSV logs to identify malicious network behavior.</p>
-                    <div class="quick-links mt-4">
-                        <button class="btn primary btn-nav" data-target="page-predictions">Go to Predictions</button>
-                        <button class="btn secondary btn-nav" data-target="page-visualizations">View Visualizations</button>
+
+                <div class="layout-grid stats">
+                    <div class="card summary-card tilt">
+                        <h3>Traffic classes</h3>
+                        <div class="big-number">10</div>
+                        <small>Normal + 9 attack families</small>
                     </div>
+                    <div class="card summary-card tilt">
+                        <h3>Dataset</h3>
+                        <div class="big-number sm">UNSW-NB15</div>
+                        <small>257k labelled network flows</small>
+                    </div>
+                    <div class="card summary-card tilt">
+                        <h3>Deployed models</h3>
+                        <div class="big-number" id="dashModelCount">--</div>
+                        <small>LightGBM &amp; neural network</small>
+                    </div>
+                </div>
+
+                <div class="layout-grid features">
+                    <div class="card tilt"><div class="f-ico">01</div><h4>Single flow analysis</h4><p>Enter flow features or paste JSON and get the predicted attack class with confidence and top-3 alternatives.</p></div>
+                    <div class="card tilt"><div class="f-ico">02</div><h4>Batch CSV scanning</h4><p>Upload captured traffic, review a class distribution chart, and export every prediction.</p></div>
+                    <div class="card tilt"><div class="f-ico">03</div><h4>Model comparison</h4><p>Run all models side by side and flag disagreements that deserve an analyst's attention.</p></div>
                 </div>
             </section>
 
-            <!-- Page: Model Training -->
+            <!-- Training -->
             <section id="page-training" class="page hidden">
-                <header class="page-header">
-                    <h1>Model Training Information</h1>
-                </header>
+                <header class="page-header"><h1>Model Training</h1></header>
                 <div class="card">
                     <p>These models were trained on the UNSW-NB15 dataset using an 80/20 train/test split. Due to severe class imbalance, SMOTENC (Synthetic Minority Over-sampling Technique for Nominal and Continuous) was applied to the training set. A RobustScaler was used to handle outliers in the numerical features before passing them to the final estimators.</p>
-                    
-                    <h4 class="mt-4">LightGBM (Gradient Boosting)</h4>
-                    <p>A fast, distributed, high-performance gradient boosting framework based on decision tree algorithms.</p>
-                    
-                    <h4 class="mt-4">MLP (Neural Network)</h4>
-                    <p>A Multi-Layer Perceptron trained with backpropagation, designed to capture complex non-linear relationships in network traffic.</p>
+                    <div class="layout-grid mt-4">
+                        <div class="inner"><h4>LightGBM · Gradient Boosting</h4><p>A fast, distributed, high-performance gradient boosting framework based on decision tree algorithms.</p></div>
+                        <div class="inner"><h4>MLP · Neural Network</h4><p>A Multi-Layer Perceptron trained with backpropagation, designed to capture complex non-linear relationships in network traffic.</p></div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Page: Visualizations -->
+            <!-- Visualizations -->
             <section id="page-visualizations" class="page hidden">
                 <header class="page-header">
                     <h1>Model Visualizations</h1>
-                    <select id="vizModelSelect" class="form-select">
-                        <!-- Populated by JS -->
-                    </select>
+                    <select id="vizModelSelect" class="form-select"></select>
                 </header>
-                
                 <div class="layout-grid">
-                    <div class="card">
-                        <h3>Validation Confusion Matrix</h3>
-                        <img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid">
-                    </div>
-                    <div class="card">
-                        <h3>Test Confusion Matrix</h3>
-                        <img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid">
-                    </div>
+                    <div class="card"><h3>Validation Confusion Matrix</h3><img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid"></div>
+                    <div class="card"><h3>Test Confusion Matrix</h3><img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid"></div>
                     <div class="card" style="grid-column: 1 / -1;">
                         <h3>ROC-AUC Curve (Test)</h3>
                         <img id="vizRoc" src="" alt="ROC Curve" class="img-fluid" style="max-width: 600px; margin: 0 auto; display: block;">
@@ -120,34 +109,27 @@
                 </div>
             </section>
 
-            <!-- Page: Predictions -->
+            <!-- Predictions -->
             <section id="page-predictions" class="page hidden">
                 <header class="page-header">
-                    <h1>Predictions</h1>
+                    <h1>Threat Analysis</h1>
                     <select id="predictModelSelect" class="form-select">
                         <option value="compare_all">Compare All Models</option>
                     </select>
                 </header>
-
                 <div class="layout-grid">
-                    <!-- Manual Input Panel -->
                     <div class="card">
                         <h2>Manual Input</h2>
                         <div class="toggle-mode mb-3">
                             <label><input type="radio" name="inputMode" value="form" checked> Form</label>
                             <label><input type="radio" name="inputMode" value="json"> JSON</label>
                         </div>
-                        
                         <form id="singleForm" class="dynamic-form"></form>
-                        
                         <div id="jsonInputMode" class="hidden">
                             <textarea id="jsonInput" rows="10" placeholder='{"proto": "tcp", ...}'></textarea>
                         </div>
-                        
-                        <button id="btnAnalyze" class="btn primary mt-3">Predict</button>
+                        <button id="btnAnalyze" class="btn primary mt-3">Analyse flow</button>
                         <div id="singleError" class="error hidden mt-3"></div>
-                        
-                        <!-- Results -->
                         <div id="singleResultArea" class="mt-4 hidden">
                             <hr>
                             <h3>Result</h3>
@@ -155,31 +137,24 @@
                         </div>
                     </div>
 
-                    <!-- Batch Upload Panel -->
                     <div class="card">
                         <h2>Batch Prediction (Upload CSV)</h2>
                         <input type="file" id="batchFile" accept=".csv" class="mb-3">
                         <button id="btnBatch" class="btn primary">Run Detection</button>
                         <div id="batchError" class="error hidden mt-3"></div>
-
                         <div id="batchResults" class="hidden mt-4">
                             <hr>
                             <div class="flex-between mb-3">
                                 <h3>Batch Results</h3>
                                 <button id="btnDownloadCSV" class="btn secondary sm">Download Results</button>
                             </div>
-                            
-                            <!-- Distribution Chart (only for single model) -->
                             <div id="batchChartContainer" class="hidden mb-4">
                                 <h4>Distribution</h4>
                                 <canvas id="batchChart"></canvas>
                             </div>
-
                             <div class="table-responsive">
                                 <table id="batchTable" class="data-table">
-                                    <thead>
-                                        <tr id="batchTableHeadRow"></tr>
-                                    </thead>
+                                    <thead><tr id="batchTableHeadRow"></tr></thead>
                                     <tbody></tbody>
                                 </table>
                             </div>
@@ -188,32 +163,21 @@
                 </div>
             </section>
 
-            <!-- Page: Model History -->
+            <!-- History -->
             <section id="page-history" class="page hidden">
-                <header class="page-header">
-                    <h1>Model Performance History</h1>
-                </header>
+                <header class="page-header"><h1>Model Performance</h1></header>
                 <div class="card">
                     <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Model</th>
-                                <th>Test Accuracy</th>
-                                <th>Test Weighted F1</th>
-                                <th>Dataset</th>
-                            </tr>
-                        </thead>
+                        <thead><tr><th>Model</th><th>Test Accuracy</th><th>Test Weighted F1</th><th>Dataset</th></tr></thead>
                         <tbody id="historyTableBody"></tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- Page: Settings -->
+            <!-- Settings -->
             <section id="page-settings" class="page hidden">
-                <header class="page-header">
-                    <h1>Settings</h1>
-                </header>
-                <div class="card" style="max-width: 500px;">
+                <header class="page-header"><h1>Settings</h1></header>
+                <div class="card" style="max-width: 520px;">
                     <div class="form-group mb-3">
                         <label>API Base URL</label>
                         <input type="text" id="apiBaseUrl" value="http://127.0.0.1:8000/api">
@@ -228,6 +192,8 @@
             </section>
         </main>
     </div>
+
+    <script src="scene.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

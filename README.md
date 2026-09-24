@@ -56,6 +56,8 @@ Requires Python 3.11 or 3.12 — the committed model files were saved with sciki
    The backend will start at `http://127.0.0.1:8000`.
 
 ### Frontend
+Two UIs are provided: `frontend/` (dashboard) and `frontend_3d/` (3D Three.js globe design; use this for the demo). Both work the same way; the steps below apply to either. For the 3D one, add its origin to `ALLOWED_ORIGINS`. Batch upload limits can be raised with the `MAX_UPLOAD_MB` and `MAX_ROWS` env vars.
+
 1. The frontend consists of static files in the `frontend` folder.
 2. Serve the `frontend` directory using any local web server. For example:
    - Using VS Code Live Server extension: Right click `index.html` -> Open with Live Server.

@@ -7,12 +7,14 @@ from ..security import require_api_key
 import pandas as pd
 import numpy as np
 import io
+import os
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
-MAX_ROWS = 20_000
+# Upload limits guard against abuse; override with env vars (MAX_UPLOAD_MB, MAX_ROWS).
+MAX_UPLOAD_BYTES = int(os.environ.get("MAX_UPLOAD_MB", "5")) * 1024 * 1024
+MAX_ROWS = int(os.environ.get("MAX_ROWS", "20000"))
 
 @router.post("/predict-batch", dependencies=[Depends(require_api_key)])
 async def predict_batch(file: UploadFile = File(...), model: str = Query("lightgbm")):
