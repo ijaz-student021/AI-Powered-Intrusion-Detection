@@ -1,33 +1,49 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+import logging
 from .. import schemas
 from .. import model_loader
 from .. import preprocessing
+from ..security import require_api_key
 import pandas as pd
 import numpy as np
 import io
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
-@router.post("/predict-batch")
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB
+MAX_ROWS = 20_000
+
+@router.post("/predict-batch", dependencies=[Depends(require_api_key)])
 async def predict_batch(file: UploadFile = File(...), model: str = Query("lightgbm")):
     if not model_loader.is_loaded:
         raise HTTPException(status_code=500, detail="Model artifacts are not loaded.")
-        
+
     if not file.filename.endswith('.csv'):
         raise HTTPException(status_code=400, detail="Uploaded file must be a CSV.")
-        
+
+    contents = await file.read()
+    if len(contents) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"CSV exceeds the {MAX_UPLOAD_BYTES // (1024 * 1024)} MB upload limit.",
+        )
+
     try:
-        contents = await file.read()
         df = pd.read_csv(io.BytesIO(contents))
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid or malformed CSV file.")
-        
+
+    if len(df) > MAX_ROWS:
+        raise HTTPException(status_code=400, detail=f"CSV exceeds the {MAX_ROWS:,}-row limit.")
+
     try:
         processed_df = preprocessing.preprocess_raw(df)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Preprocessing error: {e}")
+    except Exception:
+        logger.exception("Preprocessing error")
+        raise HTTPException(status_code=500, detail="Failed to preprocess the uploaded CSV.")
         
     try:
         total_rows = len(df)
@@ -108,5 +124,8 @@ async def predict_batch(file: UploadFile = File(...), model: str = Query("lightg
                 "results": results,
                 "summary": summary
             }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Batch prediction error")
+        raise HTTPException(status_code=500, detail="Batch prediction failed.")

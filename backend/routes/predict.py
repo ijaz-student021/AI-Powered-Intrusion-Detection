@@ -1,12 +1,15 @@
-from fastapi import APIRouter, HTTPException, Request, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from typing import Optional
+import logging
 from .. import schemas
 from .. import model_loader
 from .. import preprocessing
+from ..security import require_api_key
 import pandas as pd
 import numpy as np
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 def get_prediction_result(pipeline, processed_df):
     proba = pipeline.predict_proba(processed_df)[0]
@@ -34,7 +37,7 @@ def get_prediction_result(pipeline, processed_df):
         "low_confidence_category": low_confidence_category
     }
 
-@router.post("/predict")
+@router.post("/predict", dependencies=[Depends(require_api_key)])
 async def predict(request: Request, model: str = Query("lightgbm")):
     if not model_loader.is_loaded:
         raise HTTPException(status_code=500, detail="Model artifacts are not loaded.")
@@ -49,8 +52,9 @@ async def predict(request: Request, model: str = Query("lightgbm")):
         processed_df = preprocessing.preprocess_raw(df)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Preprocessing error: {e}")
+    except Exception:
+        logger.exception("Preprocessing error")
+        raise HTTPException(status_code=500, detail="Failed to preprocess the input record.")
         
     try:
         if model == "compare_all":
@@ -69,6 +73,9 @@ async def predict(request: Request, model: str = Query("lightgbm")):
             
             pipeline = model_loader.MODELS[model]
             return get_prediction_result(pipeline, processed_df)
-            
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Prediction error: {e}")
+
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Prediction error")
+        raise HTTPException(status_code=500, detail="Prediction failed.")

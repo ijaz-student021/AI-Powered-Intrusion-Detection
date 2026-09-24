@@ -1,4 +1,5 @@
 let API_BASE = localStorage.getItem('apiBaseUrl') || "http://127.0.0.1:8000/api";
+let API_KEY = localStorage.getItem('apiKey') || "";
 let expectedColumns = [];
 let availableModels = [];
 
@@ -6,6 +7,7 @@ document.addEventListener('DOMContentLoaded', initApp);
 
 async function initApp() {
     document.getElementById('apiBaseUrl').value = API_BASE;
+    document.getElementById('apiKey').value = API_KEY;
     
     // Sidebar Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -208,7 +210,7 @@ async function analyzeSingle() {
     try {
         const res = await fetch(`${API_BASE}/predict?model=${model}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-API-Key': API_KEY },
             body: JSON.stringify(data)
         });
         
@@ -283,6 +285,7 @@ async function analyzeBatch() {
     try {
         const res = await fetch(`${API_BASE}/predict-batch?model=${model}`, {
             method: 'POST',
+            headers: { 'X-API-Key': API_KEY },
             body: formData
         });
         
@@ -429,13 +432,16 @@ function downloadCSV() {
 
 async function testConnection() {
     const newBase = document.getElementById('apiBaseUrl').value;
+    const newKey = document.getElementById('apiKey').value;
     const resEl = document.getElementById('settingsResult');
     try {
         const res = await fetch(`${newBase}/health`);
         if (res.ok) {
             resEl.innerHTML = '<span style="color: #10b981;">✅ Connection successful! Reload to apply.</span>';
             localStorage.setItem('apiBaseUrl', newBase);
+            localStorage.setItem('apiKey', newKey);
             API_BASE = newBase;
+            API_KEY = newKey;
         } else {
             throw new Error('Bad response');
         }
