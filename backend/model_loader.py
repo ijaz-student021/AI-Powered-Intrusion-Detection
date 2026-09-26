@@ -19,10 +19,14 @@ def load_artifacts():
         pipeline_lgb = joblib.load(os.path.join(MODEL_DIR, "pipeline_lgb.pkl"))
         pipeline_mlp = joblib.load(os.path.join(MODEL_DIR, "pipeline_mlp.pkl"))
         
-        MODELS = {
-            "lightgbm": pipeline_lgb,
-            "mlp": pipeline_mlp
-        }
+        MODELS = {}
+        # Two-stage detector is the recommended model, so it is listed first.
+        two_stage_path = os.path.join(MODEL_DIR, "pipeline_twostage.pkl")
+        if os.path.exists(two_stage_path):
+            from . import two_stage  # noqa: F401  (needed to unpickle TwoStageIDS)
+            MODELS["twostage"] = joblib.load(two_stage_path)
+        MODELS["lightgbm"] = pipeline_lgb
+        MODELS["mlp"] = pipeline_mlp
         
         label_encoder = joblib.load(os.path.join(MODEL_DIR, "label_encoder.pkl"))
         

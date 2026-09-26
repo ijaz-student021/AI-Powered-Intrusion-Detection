@@ -151,7 +151,7 @@ function updateCurrentModelStatus(modelId) {
 
 function loadVisualizations(modelId) {
     const base = API_BASE.replace('/api', '');
-    const prefix = modelId === 'lightgbm' ? 'lgb' : modelId;
+    const prefix = modelId === 'lightgbm' ? 'lgb' : modelId;  // twostage / mlp use their id
     document.getElementById('vizConfVal').src = `${base}/figures/confusion_matrix_val_${prefix}.png`;
     document.getElementById('vizConfTest').src = `${base}/figures/confusion_matrix_test_${prefix}.png`;
     document.getElementById('vizRoc').src = `${base}/figures/roc_auc_test_${prefix}.png`;

@@ -15,14 +15,22 @@ Design, build and evaluate a proof-of-concept machine-learning model that classi
 2. Open `Assignmetn_one_file.ipynb` in Jupyter/Colab, fix the CSV paths, and run all cells top to bottom (SMOTENC and the deep models take several minutes).
 
 ## Results Summary (unseen test set, 82,332 flows)
-| Model | Test accuracy | Macro F1 |
-|---|---|---|
-| LightGBM (deployed) | 0.71 | 0.48 |
-| XGBoost | 0.71 | 0.48 |
-| MLP | 0.67 | 0.42 |
-| Deep NN | 0.51 | 0.29 |
+| Model | 10-class accuracy | Macro F1 | Attack recall | False alarms |
+|---|---|---|---|---|
+| **Two-Stage IDS (deployed)** | **0.774** | **0.516** | 96.5% | 15.4% |
+| LightGBM (SMOTENC, notebook) | 0.71 | 0.48 | 98.9% | 32.8% |
+| XGBoost (notebook) | 0.71 | 0.48 | - | - |
+| MLP (notebook) | 0.67 | 0.42 | - | - |
+| Deep NN (notebook) | 0.51 | 0.29 | - | - |
 
-Treated as attack-vs-normal, LightGBM misses only 496 of 45,332 attacks (~98.9% recall) but raises false alarms on 32.8% of normal flows. Analysis and Backdoor recall is low (15% / 22%). Confusion matrices and ROC curves are in `reports/figures/`.
+The two-stage model (a Normal-vs-attack LightGBM plus an attack-family LightGBM) has a Normal-vs-attack ROC-AUC of 0.985. Its alert threshold is tunable: at 0.9 it flags 89% of attacks with only 2.6% false alarms. Analysis and Backdoor stay hard to identify. Why the first-round notebook results were weak (SMOTENC applied before splitting, partition shift, a serving preprocessing bug) is explained in `CLO4_IDS_Report.docx`.
+
+### Retraining the two-stage model
+```bash
+pip install matplotlib
+python scripts/train_two_stage.py --data <folder containing UNSW_NB15_training-set.csv and UNSW_NB15_testing-set.csv>
+```
+This rewrites `model/pipeline_twostage.pkl`, `model/twostage_metrics.json` and the `*_twostage.png` figures in `reports/figures/`. The API loads them on startup.
 
 ## Features
 - **FastAPI Backend**: Serves single-record predictions and batch CSV predictions.

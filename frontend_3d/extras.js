@@ -131,6 +131,9 @@
     window.onAppReady = function () {
         document.getElementById('dsFeatures').textContent = expectedColumns.length;
         drawVizCharts();
+        fetch(`${API_BASE}/metrics`).then(r => r.json()).then(m => {
+            if (m.threshold) document.getElementById('trThreshold').textContent = m.threshold.toFixed(2);
+        }).catch(() => {});
         populateHistoryTable();
     };
 })();

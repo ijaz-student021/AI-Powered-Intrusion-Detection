@@ -109,7 +109,8 @@
             <section id="page-training" class="page hidden">
                 <header class="page-header"><h1>Model Training</h1></header>
                 <div class="algo-row">
-                    <div class="algo selected"><b>LightGBM</b><span>★★★</span></div>
+                    <div class="algo selected"><b>Two-Stage IDS</b><span>★★★ recommended</span></div>
+                    <div class="algo selected"><b>LightGBM</b><span>★★☆</span></div>
                     <div class="algo selected"><b>MLP</b><span>★★★</span></div>
                     <div class="algo"><b>Random Forest</b><span>notebook only</span></div>
                     <div class="algo"><b>XGBoost</b><span>notebook only</span></div>
@@ -117,7 +118,9 @@
                 <div class="layout-grid mt-4">
                     <div class="card">
                         <h2>Algorithm Configuration</h2>
-                        <div class="kv"><span>LightGBM</span><b>defaults, random_state=42</b></div>
+                        <div class="kv"><span>Two-Stage IDS</span><b>detector + family LightGBM (regularised)</b></div>
+                        <div class="kv"><span>Alert threshold</span><b id="trThreshold">--</b></div>
+                        <div class="kv"><span>LightGBM (baseline)</span><b>defaults, random_state=42</b></div>
                         <div class="kv"><span>MLP hidden layers</span><b>(100, 50)</b></div>
                         <div class="kv"><span>MLP max iterations</span><b>1000</b></div>
                         <div class="kv"><span>Scaler</span><b>RobustScaler</b></div>
@@ -125,8 +128,8 @@
                     </div>
                     <div class="card">
                         <h2>Training Settings</h2>
-                        <div class="kv"><span>Train / validation split</span><b>80 / 20 (stratified)</b></div>
-                        <div class="kv"><span>Class balancing</span><b>SMOTENC</b></div>
+                        <div class="kv"><span>Train partition</span><b>UNSW-NB15 training set (175,341)</b></div>
+                        <div class="kv"><span>Class balancing</span><b>class weights (two-stage) / SMOTENC (baselines)</b></div>
                         <div class="kv"><span>Final test set</span><b>UNSW-NB15 partition (82,332)</b></div>
                         <div class="progress"><div style="width:100%"></div></div>
                         <small>Training complete. Models are trained in the notebook (Assignmetn_one_file.ipynb) and loaded here for inference.</small>
@@ -145,7 +148,7 @@
                 </header>
                 <div class="layout-grid">
                     <div class="card"><h3>Model Accuracy Comparison</h3><canvas id="vizAccChart"></canvas></div>
-                    <div class="card"><h3>Feature Importance (LightGBM, top 10)</h3><canvas id="vizFeatChart"></canvas></div>
+                    <div class="card"><h3>Feature Importance (attack detector, top 10)</h3><canvas id="vizFeatChart"></canvas></div>
                     <div class="card"><h3>Confusion Matrix (Test)</h3><img id="vizConfTest" src="" alt="Test Confusion Matrix" class="img-fluid"></div>
                     <div class="card"><h3>Confusion Matrix (Validation)</h3><img id="vizConfVal" src="" alt="Validation Confusion Matrix" class="img-fluid"></div>
                     <div class="card" style="grid-column: 1 / -1;">

@@ -1,0 +1,116 @@
+{
+  "id": "twostage",
+  "name": "Two-Stage IDS",
+  "test_accuracy": 0.7738,
+  "test_weighted_f1": 0.8046,
+  "test_macro_f1": 0.516,
+  "binary": {
+    "accuracy": 0.9114,
+    "attack_recall": 0.9648,
+    "attack_precision": 0.8846,
+    "false_alarm_rate": 0.1541,
+    "roc_auc": 0.9848
+  },
+  "threshold": 0.66,
+  "threshold_chosen_on": "held-out 20% of training partition, max recall with false alarms <= 5%",
+  "threshold_sweep_on_test": [
+    {
+      "threshold": 0.5,
+      "accuracy": 0.8754554729631249,
+      "attack_recall": 0.9862128297891114,
+      "false_alarm": 0.2602432432432432
+    },
+    {
+      "threshold": 0.6,
+      "accuracy": 0.9016785696934363,
+      "attack_recall": 0.973374216888732,
+      "false_alarm": 0.18616216216216216
+    },
+    {
+      "threshold": 0.7,
+      "accuracy": 0.9164480396443667,
+      "attack_recall": 0.9575575752228007,
+      "false_alarm": 0.1339189189189189
+    },
+    {
+      "threshold": 0.8,
+      "accuracy": 0.926371277267648,
+      "attack_recall": 0.9315494573369805,
+      "false_alarm": 0.07997297297297297
+    },
+    {
+      "threshold": 0.9,
+      "accuracy": 0.9288976339697809,
+      "attack_recall": 0.892129180270008,
+      "false_alarm": 0.026054054054054053
+    },
+    {
+      "threshold": 0.95,
+      "accuracy": 0.9189379585094496,
+      "attack_recall": 0.8597899938233478,
+      "false_alarm": 0.008594594594594595
+    }
+  ],
+  "per_class": {
+    "Analysis": {
+      "precision": 0.0352,
+      "recall": 0.0694,
+      "f1-score": 0.0467,
+      "support": 677.0
+    },
+    "Backdoor": {
+      "precision": 0.0692,
+      "recall": 0.8782,
+      "f1-score": 0.1283,
+      "support": 583.0
+    },
+    "DoS": {
+      "precision": 0.4451,
+      "recall": 0.1912,
+      "f1-score": 0.2675,
+      "support": 4089.0
+    },
+    "Exploits": {
+      "precision": 0.8286,
+      "recall": 0.5858,
+      "f1-score": 0.6863,
+      "support": 11132.0
+    },
+    "Fuzzers": {
+      "precision": 0.3826,
+      "recall": 0.4725,
+      "f1-score": 0.4228,
+      "support": 6062.0
+    },
+    "Generic": {
+      "precision": 0.9983,
+      "recall": 0.9697,
+      "f1-score": 0.9838,
+      "support": 18871.0
+    },
+    "Normal": {
+      "precision": 0.9515,
+      "recall": 0.8459,
+      "f1-score": 0.8956,
+      "support": 37000.0
+    },
+    "Reconnaissance": {
+      "precision": 0.8537,
+      "recall": 0.8527,
+      "f1-score": 0.8532,
+      "support": 3496.0
+    },
+    "Shellcode": {
+      "precision": 0.2198,
+      "recall": 0.9683,
+      "f1-score": 0.3583,
+      "support": 378.0
+    },
+    "Worms": {
+      "precision": 0.3689,
+      "recall": 0.8636,
+      "f1-score": 0.517,
+      "support": 44.0
+    }
+  }
+}
