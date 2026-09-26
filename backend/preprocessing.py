@@ -17,10 +17,10 @@ def preprocess_raw(df: pd.DataFrame) -> pd.DataFrame:
     if meta.get("label_column_dropped") in df.columns:
         cols_to_drop.append(meta["label_column_dropped"])
         
-    for col in meta.get("redundant_columns_dropped", []):
-        if col in df.columns:
-            cols_to_drop.append(col)
-            
+    # NOTE: the "redundant" columns are deliberately kept. The saved LightGBM/MLP
+    # pipelines were fitted with them (they are in encoded_column_order); zeroing
+    # them at inference caused train/serve skew. Models that do not use them
+    # (the two-stage model) select their own columns.
     df = df.drop(columns=cols_to_drop, errors='ignore')
     
     # 2. One-hot encode
